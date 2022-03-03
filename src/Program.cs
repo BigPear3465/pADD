@@ -14,6 +14,7 @@ namespace pADD
         static EnvironmentVariableTarget specifier = EnvironmentVariableTarget.Machine; //user or all users (local machine)
         static string sysVar = "PATH"; //system variable
         static string envVar = SecureEnvVar(); //enviroment variable
+        static int length = 0; //Number of arguments inputed
 
         /// <summary>
         /// Makes sure envVar isnt empty and causes a crash
@@ -21,17 +22,14 @@ namespace pADD
         /// <returns></returns>
         static string SecureEnvVar()
         {
-            if(Environment.GetEnvironmentVariable(sysVar, specifier) != null)
+            string getEnvVar = Environment.GetEnvironmentVariable(sysVar, specifier);
+            if (getEnvVar != null)
             {
-                return Environment.GetEnvironmentVariable(sysVar, specifier);
-            }
-            else if(Environment.GetEnvironmentVariable(sysVar, specifier) == null)
-            {
-                return "";
+                return getEnvVar;
             }
             else
             {
-                throw new Exception();
+                throw new Exception("No system variable PATH found");
             }
         }
 
@@ -45,7 +43,7 @@ namespace pADD
             Console.WriteLine("[help / h] - Lists all available commands \n");
             Console.WriteLine("[add / a] [dir path(s) or leave to use current dir path] [user / u or alluser / a or leave blank to use default] - Adds directory path to system enviorment PATH (use ; after each dir), specifier adds to current user or all users \n");
             Console.WriteLine("[remove / r] [dir path(s) or leave to use current dir path] [user / u or alluser / a or leave blank to use default] - Removes directory path from system enviroments PATH (use ; after each dir), specifier removes to current user or all users \n");
-            Console.WriteLine("[list / l] [user / u or machine / m or leave blank to use default [v]] - Lists variable folders, specifier lists current user or all users \n");
+            Console.WriteLine("[list / l] [user / u or alluser / a or leave blank to use default] - Lists variable folders, specifier lists current user or all users \n");
             Console.WriteLine("[change / c] [variable name] [ user or alluser or leave blank to use default] - Changes default system enviorment path which add, remove, list uses \n");
             Console.WriteLine("[verify / v] - Outputs default variable and default specifier, change with [change / c] \n");
         }
@@ -56,59 +54,68 @@ namespace pADD
         /// <param name="args"></param>
         static void AddDir(string[] args)
         {
-            if(args.Length == 1)
+            if(length == 1)
             {
-                if (envVar.Contains(Environment.CurrentDirectory + ";"))
+                string currentDir = Environment.CurrentDirectory;
+                if (envVar.Contains(currentDir + ";") || envVar.Contains(currentDir))
                 {
                     Console.WriteLine(sysVar + " already contains this directory");
                 }
-                else if (envVar.Contains(Environment.CurrentDirectory))
+                else if(!envVar.Contains(currentDir + ";") || !envVar.Contains(currentDir))
                 {
-                    Console.WriteLine(sysVar + " already contains this directory");
-                }
-                else if(!envVar.Contains(Environment.CurrentDirectory + ";"))
-                {
-                    Environment.SetEnvironmentVariable(sysVar, envVar + Environment.CurrentDirectory + ";", specifier);
-                }
-                else if (!envVar.Contains(Environment.CurrentDirectory))
-                {
-                    Environment.SetEnvironmentVariable(sysVar, envVar + Environment.CurrentDirectory, specifier);
+                    Console.WriteLine("Loading...");
+
+                    if (!envVar.EndsWith(";")) //Makes sure the envVar is prepared for another dir
+                    {
+                        envVar += ";";
+                    }
+                    if (!currentDir.EndsWith(";")) //Makes sure the dir ends with ;
+                    {
+                        currentDir += ";";
+                    }
+                    Environment.SetEnvironmentVariable(sysVar, envVar + currentDir, specifier);
+
+                    Console.WriteLine("Done");
                 }
                 else
                 {
                     throw new Exception();
                 }
             }
-            else if (args.Length == 2)
+            else if (length == 2)
             {
-                if (envVar.Contains(args[1] + ";"))
-                {
-                    Console.WriteLine(sysVar + " already contains this directory");
-                }
-                else if (envVar.Contains(args[1]))
+                if (envVar.Contains(args[1] + ";") || envVar.Contains(args[1]))
                 {
                     Console.WriteLine(sysVar + " already contains this directory");
                 }
                 else if (!envVar.Contains(args[1] + ";"))
                 {
-                    if (!envVar.EndsWith(";"))
+                    Console.WriteLine("Loading...");
+
+                    if (!envVar.EndsWith(";")) //Makes sure the envVar is prepared for another dir
                     {
                         envVar += ";";
                     }
-                    Environment.SetEnvironmentVariable(sysVar, envVar + args[1] + ";", specifier);
-                }
-                else if (!envVar.Contains(args[1]))
-                {
+                    if (!args[1].EndsWith(";")) //Makes sure the dir ends with ;
+                    {
+                        args[1] += ";";
+                    }
                     Environment.SetEnvironmentVariable(sysVar, envVar + args[1], specifier);
+
+                    Console.WriteLine("Done");
                 }
                 else
                 {
                     throw new Exception();
                 }
             }
-            else
+            else if(length > 2)
             {
                 Console.WriteLine("Too many commands, try help or h");
+            }
+            else
+            {
+                Console.WriteLine("[add / a] [dir path(s) or leave to use current dir path] [user / u or alluser / a or leave blank to use default] - Adds directory path to system enviorment PATH (use ; after each dir), specifier adds to current user or all users \n");
             }
         }
 
@@ -118,21 +125,26 @@ namespace pADD
         /// <param name="args"></param>
         static void RemoveDir(string[] args)
         {
-            if (args.Length == 1)
+            if (length == 1)
             {
-                if (envVar.Contains(Environment.CurrentDirectory + ";"))
+                string currentDir = Environment.CurrentDirectory;
+                if (envVar.Contains(currentDir + ";"))
                 {
-                    Environment.SetEnvironmentVariable(sysVar, envVar.TrimStart((Environment.CurrentDirectory + ";").ToCharArray()), specifier);
+                    Console.WriteLine("Loading...");
+
+                    Environment.SetEnvironmentVariable(sysVar, envVar.TrimStart((currentDir + ";").ToCharArray()), specifier);
+
+                    Console.WriteLine("Done");
                 }
-                else if (envVar.Contains(Environment.CurrentDirectory))
+                else if (envVar.Contains(currentDir))
                 {
-                    Environment.SetEnvironmentVariable(sysVar, envVar.TrimStart((Environment.CurrentDirectory).ToCharArray()), specifier);
+                    Console.WriteLine("Loading...");
+
+                    Environment.SetEnvironmentVariable(sysVar, envVar.TrimStart((currentDir).ToCharArray()), specifier);
+
+                    Console.WriteLine("Done");
                 }
-                else if(!envVar.Contains(Environment.CurrentDirectory + ";"))
-                {
-                    Console.WriteLine(sysVar + " doesn't contains this directory");
-                }
-                else if (!envVar.Contains(Environment.CurrentDirectory))
+                else if(!envVar.Contains(currentDir + ";") || !envVar.Contains(currentDir))
                 {
                     Console.WriteLine(sysVar + " doesn't contains this directory");
                 }
@@ -141,23 +153,27 @@ namespace pADD
                     throw new Exception();
                 }
             }
-            else if (args.Length == 2)
+            else if (length == 2)
             {
                 if (envVar.Contains(args[1] + ";"))
                 {
+                    Console.WriteLine("Loading...");
+
                     string tmp = envVar.Trim((args[1] + ";").ToCharArray());
                     Environment.SetEnvironmentVariable(sysVar, tmp, specifier);
+
+                    Console.WriteLine("Done");
                 }
                 else if (envVar.Contains(args[1]))
                 {
+                    Console.WriteLine("Loading...");
+
                     string tmp = envVar.Trim((args[1]).ToCharArray());
                     Environment.SetEnvironmentVariable(sysVar, tmp, specifier);
+
+                    Console.WriteLine("Done");
                 }
-                else if (!envVar.Contains(args[1] + ";"))
-                {
-                    Console.WriteLine(sysVar + " doesn't contains this directory");
-                }
-                else if (!envVar.Contains(args[1]))
+                else if (!envVar.Contains(args[1] + ";") || !envVar.Contains(args[1]))
                 {
                     Console.WriteLine(sysVar + " doesn't contains this directory");
                 }
@@ -166,9 +182,13 @@ namespace pADD
                     throw new Exception();
                 }
             }
-            else
+            else if(length > 2)
             {
                 Console.WriteLine("Too many commands, try help or h");
+            }
+            else
+            {
+                Console.WriteLine("[remove / r] [dir path(s) or leave to use current dir path] [user / u or alluser / a or leave blank to use default] - Removes directory path from system enviroments PATH (use ; after each dir), specifier removes to current user or all users \n");
             }
         }
 
@@ -196,16 +216,32 @@ namespace pADD
         /// </summary>
         static void ChangeSysVar(string[] args)
         {
-            sysVar = ConfigurationManager.AppSettings.Get("sysVar");
-            envVar = ConfigurationManager.AppSettings.Get("specifier");
-
-            if(args[1] != null)
+            if (length == 1 && (args[1] != null || args[1] != ""))
             {
-                ConfigurationManager.AppSettings.Add("sysVar", args[1].ToLower());
-                if (args[2] != null)
+                Properties.Settings.Default.sysVar = args[1];
+
+                if (length == 2 && (args[2] != null || args[2] != ""))
                 {
-                    ConfigurationManager.AppSettings.Add("specifier", args[2].ToLower());
+                    switch (args[2])
+                    {
+                        case "user": Properties.Settings.Default.specifier = "user"; break;
+                        case "alluser": Properties.Settings.Default.specifier = "alluser"; break;
+                        case "u": Properties.Settings.Default.specifier = "user"; break;
+                        case "a": Properties.Settings.Default.specifier = "alluser"; break;
+                        default: Properties.Settings.Default.specifier = "alluser"; Console.WriteLine("specifier error, set to defualt"); break;
+                    }
+                    Properties.Settings.Default.Save();
+                    Console.WriteLine("Done");
                 }
+                else
+                {
+                    Properties.Settings.Default.Save();
+                    Console.WriteLine("Done");
+                }
+            }
+            else
+            {
+                Console.WriteLine("[change / c] [variable name] [ user or alluser or leave blank to use default] - Changes default system enviorment path which add, remove, list uses \n");
             }
         }
 
@@ -222,26 +258,29 @@ namespace pADD
         /// </summary>
         static void Config()
         {
-            if (!ConfigurationManager.AppSettings.HasKeys())
+            if (File.Exists("pADD.exe.config"))
             {
-                Console.WriteLine("Config file not found, running on default integrated settings (redownload config file if empty)");
-            }
-            else
-            {
-                sysVar = ConfigurationManager.AppSettings.Get("sysVar");
-                string localSpecifier = ConfigurationManager.AppSettings.Get("specifier");
+                sysVar = Properties.Settings.Default.sysVar;
+                string localSpecifier = Properties.Settings.Default.specifier;
 
                 switch (localSpecifier)
                 {
                     case "user": specifier = EnvironmentVariableTarget.User; break;
                     case "alluser": specifier = EnvironmentVariableTarget.Machine; break;
-                    default: specifier = EnvironmentVariableTarget.Machine; break;
+                    case "u": specifier = EnvironmentVariableTarget.User; break;
+                    case "a": specifier = EnvironmentVariableTarget.Machine; break;
+                    default: specifier = EnvironmentVariableTarget.Machine; Console.WriteLine("specifier error, set to defualt"); break;
                 }
+            }
+            else
+            {
+                Console.WriteLine("Config file not found (redownload config file)");
             }
         }
 
         static void Main(string[] args)
         {
+            length = args.Length; //number of arguments inputed
             Config(); //Loads config
 
             if (args[0].ToLower() == "help" || args[0].ToLower() == "h")
@@ -251,12 +290,10 @@ namespace pADD
             else if (args[0].ToLower() == "add" || args[0].ToLower() == "a")
             {
                 AddDir(args);
-                Console.WriteLine("Done");
             }
             else if (args[0].ToLower() == "remove" || args[0].ToLower() == "r")
             {
                 RemoveDir(args);
-                Console.WriteLine("Done");
             }
             else if (args[0].ToLower() == "list" || args[0].ToLower() == "l")
             {
@@ -265,7 +302,6 @@ namespace pADD
             else if (args[0].ToLower() == "change" || args[0].ToLower() == "c")
             {
                 ChangeSysVar(args);
-                Console.WriteLine("Done");
             }
             else if (args[0].ToLower() == "verify" || args[0].ToLower() == "v")
             {
