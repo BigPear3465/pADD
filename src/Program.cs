@@ -109,7 +109,64 @@ namespace pADD
                     throw new Exception();
                 }
             }
-            else if(length > 2)
+            else if (length == 2)
+            {
+                if(args[2] == "u" || args[2] == "user")
+                {
+                    if (envVar.Contains(args[1] + ";") || envVar.Contains(args[1]))
+                    {
+                        Console.WriteLine(sysVar + " already contains this directory");
+                    }
+                    else if (!envVar.Contains(args[1] + ";"))
+                    {
+                        Console.WriteLine("Loading...");
+
+                        if (!envVar.EndsWith(";")) //Makes sure the envVar is prepared for another dir
+                        {
+                            envVar += ";";
+                        }
+                        if (!args[1].EndsWith(";")) //Makes sure the dir ends with ;
+                        {
+                            args[1] += ";";
+                        }
+                        Environment.SetEnvironmentVariable(sysVar, envVar + args[1], EnvironmentVariableTarget.User);
+
+                        Console.WriteLine("Done");
+                    }
+                    else
+                    {
+                        throw new Exception();
+                    }
+                }
+                else if (args[2] == "a" || args[2] == "alluser")
+                {
+                    if (envVar.Contains(args[1] + ";") || envVar.Contains(args[1]))
+                    {
+                        Console.WriteLine(sysVar + " already contains this directory");
+                    }
+                    else if (!envVar.Contains(args[1] + ";"))
+                    {
+                        Console.WriteLine("Loading...");
+
+                        if (!envVar.EndsWith(";")) //Makes sure the envVar is prepared for another dir
+                        {
+                            envVar += ";";
+                        }
+                        if (!args[1].EndsWith(";")) //Makes sure the dir ends with ;
+                        {
+                            args[1] += ";";
+                        }
+                        Environment.SetEnvironmentVariable(sysVar, envVar + args[1], EnvironmentVariableTarget.Machine);
+
+                        Console.WriteLine("Done");
+                    }
+                    else
+                    {
+                        throw new Exception();
+                    }
+                }
+            }
+            else if(length > 3)
             {
                 Console.WriteLine("Too many commands, try help or h");
             }
@@ -182,7 +239,68 @@ namespace pADD
                     throw new Exception();
                 }
             }
-            else if(length > 2)
+            else if (length == 3)
+            {
+                if (args[2] == "u" || args[2] == "user")
+                {
+                    if (envVar.Contains(args[1] + ";"))
+                    {
+                        Console.WriteLine("Loading...");
+
+                        string tmp = envVar.Trim((args[1] + ";").ToCharArray());
+                        Environment.SetEnvironmentVariable(sysVar, tmp, EnvironmentVariableTarget.User);
+
+                        Console.WriteLine("Done");
+                    }
+                    else if (envVar.Contains(args[1]))
+                    {
+                        Console.WriteLine("Loading...");
+
+                        string tmp = envVar.Trim((args[1]).ToCharArray());
+                        Environment.SetEnvironmentVariable(sysVar, tmp, EnvironmentVariableTarget.User);
+
+                        Console.WriteLine("Done");
+                    }
+                    else if (!envVar.Contains(args[1] + ";") || !envVar.Contains(args[1]))
+                    {
+                        Console.WriteLine(sysVar + " doesn't contains this directory");
+                    }
+                    else
+                    {
+                        throw new Exception();
+                    }
+                }
+                else if (args[2] == "a" || args[2] == "alluser")
+                {
+                    if (envVar.Contains(args[1] + ";"))
+                    {
+                        Console.WriteLine("Loading...");
+
+                        string tmp = envVar.Trim((args[1] + ";").ToCharArray());
+                        Environment.SetEnvironmentVariable(sysVar, tmp, EnvironmentVariableTarget.Machine);
+
+                        Console.WriteLine("Done");
+                    }
+                    else if (envVar.Contains(args[1]))
+                    {
+                        Console.WriteLine("Loading...");
+
+                        string tmp = envVar.Trim((args[1]).ToCharArray());
+                        Environment.SetEnvironmentVariable(sysVar, tmp, EnvironmentVariableTarget.Machine);
+
+                        Console.WriteLine("Done");
+                    }
+                    else if (!envVar.Contains(args[1] + ";") || !envVar.Contains(args[1]))
+                    {
+                        Console.WriteLine(sysVar + " doesn't contains this directory");
+                    }
+                    else
+                    {
+                        throw new Exception();
+                    }
+                }
+            }
+            else if(length > 3)
             {
                 Console.WriteLine("Too many commands, try help or h");
             }
