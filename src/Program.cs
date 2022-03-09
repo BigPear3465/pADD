@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
-using System.Configuration;
-using System.Collections.Specialized;
 
 namespace pADD
 {
@@ -334,28 +328,24 @@ namespace pADD
         /// </summary>
         static void ChangeSysVar(string[] args)
         {
-            if (length == 1 && (args[1] != null || args[1] != ""))
+            if (length == 2 && (args[1] != null && args[1] != ""))
             {
                 Properties.Settings.Default.sysVar = args[1];
-
-                if (length == 2 && (args[2] != null || args[2] != ""))
+                Properties.Settings.Default.Save();
+                Console.WriteLine("Done");
+            }
+            else if (length == 3 && (args[2] != null && args[2] != ""))
+            {
+                switch (args[2].ToLower())
                 {
-                    switch (args[2])
-                    {
-                        case "user": Properties.Settings.Default.specifier = "user"; break;
-                        case "alluser": Properties.Settings.Default.specifier = "alluser"; break;
-                        case "u": Properties.Settings.Default.specifier = "user"; break;
-                        case "a": Properties.Settings.Default.specifier = "alluser"; break;
-                        default: Properties.Settings.Default.specifier = "alluser"; Console.WriteLine("specifier error, set to defualt"); break;
-                    }
-                    Properties.Settings.Default.Save();
-                    Console.WriteLine("Done");
+                    case "user": Properties.Settings.Default.specifier = "user"; break;
+                    case "alluser": Properties.Settings.Default.specifier = "alluser"; break;
+                    case "u": Properties.Settings.Default.specifier = "user"; break;
+                    case "a": Properties.Settings.Default.specifier = "alluser"; break;
+                    default: Properties.Settings.Default.specifier = "alluser"; Console.WriteLine("specifier error, set to defualt"); break;
                 }
-                else
-                {
-                    Properties.Settings.Default.Save();
-                    Console.WriteLine("Done");
-                }
+                Properties.Settings.Default.Save();
+                Console.WriteLine("Done");
             }
             else
             {
@@ -368,7 +358,20 @@ namespace pADD
         /// </summary>
         static void GetSysVar()
         {
-            Console.WriteLine("variable: " + sysVar + ", " + "default specifier: " + specifier);
+            string info()
+            {
+                if (specifier == EnvironmentVariableTarget.Machine)
+                {
+                    return " (alluser)";
+                }
+                else
+                {
+                    return " (local)";
+                }
+            }
+
+            Console.WriteLine("variable: " + sysVar + ", " + "default specifier: " + specifier + info());
+
         }
 
         /// <summary>
@@ -376,7 +379,7 @@ namespace pADD
         /// </summary>
         static void Config()
         {
-            if (File.Exists("pADD.exe.config"))
+            if (File.Exists(AppDomain.CurrentDomain.SetupInformation.ConfigurationFile))
             {
                 sysVar = Properties.Settings.Default.sysVar;
                 string localSpecifier = Properties.Settings.Default.specifier;
